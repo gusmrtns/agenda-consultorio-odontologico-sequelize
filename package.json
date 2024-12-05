@@ -1,0 +1,58 @@
+{
+  
+ "name": "residencia_de_software",
+  
+ "version": "1.0.0",
+  
+ "description": "",
+  
+ "main": "app.js",
+  
+ "type": "module",
+  
+ "scripts": {
+  
+   
+ "docs": "jsdoc ./src --destination ./docs",
+  
+   
+ "start": "node app.js"
+  
+ },
+  
+ "author": "",
+  
+ "license": "ISC",
+  
+ "dependencies": {
+  
+   
+ "dotenv": "^16.4.7",
+  
+   
+ "luxon": "^3.5.0",
+  
+   
+ "pg": "^8.13.1",
+  
+   
+ "pg-hstore": "^2.3.4",
+  
+   
+ "prompt-sync": "^4.2.0",
+  
+   
+ "residencia_de_software": "file:",
+  
+   
+ "sequelize": "^6.37.5"
+  
+ },
+  
+ "devDependencies": {
+  
+   
+ "jsdoc": "^4.0.4"
+  
+ }
+}

@@ -9,7 +9,7 @@
 - **Desenvolvimento individual**: O desafio deve ser realizado de forma independente.
 - **Data limite de entrega**: 12/12/2024 (quarta-feira).
 - **Versionamento**: O projeto deve ser versionado e disponibilizado no **GitHub**.
-- **Fork do repositório**: O repositório do [desafio#1.2](https://github.com/gusmrtns/agenda-consultorio-odontologico) #1.2 deve ser **clonado** (fork) para implementação do desafio #3.1.
+- **Fork do repositório**: O repositório do [desafio#1.2](https://github.com/gusmrtns/agenda-consultorio-odontologico) deve ser **clonado** (fork) para implementação do desafio #3.1.
 
 ## Requisitos
 

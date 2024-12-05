@@ -1,0 +1,85 @@
+@startuml
+
+left to right direction
+
+class Paciente {
+    - cpf: string
+    - nome: string
+    - dataNascimento: Date
+}
+
+class Consulta {
+    - paciente: Paciente
+    - dataConsulta: Date
+    - horaInicio: string
+    - horaFim: string
+}
+
+class Agenda {
+    - consultas: Consulta[]
+    + adicionarConsulta(consulta: Consulta): void
+    + cancelarConsulta(cpf: string, dataConsulta: Date, horaInicio: string): void
+    + listarConsultas(periodoInicio: Date, periodoFim?: Date): Consulta[]
+    + adicionarPaciente(paciente: Paciente): void
+    + removerPaciente(cpf: string): void
+    + getPacientes(): Paciente[]
+}
+
+class PacienteFactory {
+    + criarPaciente(cpf: string, nome: string, dataNascimento: Date): {valido: boolean, erro?: string, paciente?: Paciente}
+    + validarCPF(cpf: string): boolean
+    + validarIdadeMinima(dataNascimento: Date): boolean
+    + validarNome(nome: string): boolean
+    + verificarExistencia(cpf: string): boolean
+}
+
+class ConsultaFactory {
+    + criarConsulta(paciente: Paciente, dataConsulta: Date, horaInicio: string, horaFim: string): {valido: boolean, erro?: string, consulta?: Consulta}
+    + validarHorario(horaInicio: string, horaFim: string): {valido: boolean, erro?: string}
+    + ehFuturo(dataConsulta: Date): boolean
+    + verificarSobreposicao(dataConsulta: Date, horaInicio: string, horaFim: string): boolean
+    + converterParaMinutos(horario: string): number
+    + ehIntervaloDe15Minutos(minutos: number): boolean
+}
+
+class PacienteController {
+    + cadastrarPaciente()
+    + excluirPaciente()
+    + listarPacientes(ordenadoPor: string)
+}
+
+class AgendaController {
+    + agendarConsulta()
+    + cancelarConsulta()
+    + listarAgenda(periodoInicio?: Date, periodoFim?: Date)
+}
+
+class PacienteView {
+    + obterDadosPaciente(): { cpf: string, nome: string, dataNascimento: string }
+    + obterCpfPaciente(): string
+    + listarPacientes(pacientes: Paciente[]): void
+    + mostrarErro(erro: string): void
+    + mostrarMensagem(mensagem: string): void
+}
+
+class AgendaView {
+    + obterDadosConsulta(): { cpf: string, dataConsulta: string, horaInicio: string, horaFim: string }
+    + obterDadosCancelamento(): { cpf: string, dataConsulta: string, horaInicio: string }
+    + listarAgenda(consultas: Consulta[]): void
+    + mostrarErro(erro: string): void
+    + mostrarMensagem(mensagem: string): void
+}
+
+Paciente "1" -- "1..*" Consulta : association
+Agenda "1" o-- "1..*" Consulta : composition
+
+PacienteFactory --> Paciente : creates
+ConsultaFactory --> Consulta : creates
+
+PacienteController --> PacienteFactory : uses
+AgendaController --> ConsultaFactory : uses
+
+PacienteController --> PacienteView : displays
+AgendaController --> AgendaView : displays
+
+@enduml
