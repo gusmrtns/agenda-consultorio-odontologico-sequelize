@@ -1,4 +1,4 @@
-import Paciente from '../models/Paciente';
+import Paciente from '../models/Paciente.js';
 
 class PacienteDAO {
   async criar(pacienteData) {

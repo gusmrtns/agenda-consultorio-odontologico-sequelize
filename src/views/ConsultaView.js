@@ -66,5 +66,17 @@ export default {
      */
     mostrarMensagem(mensagem) {
         console.log(mensagem);
-    }
+    },
+
+   /**
+   * Solicita ao usuário um intervalo de datas.
+   * @async
+   * @returns {Promise<Object>} Objeto contendo dataInicio e dataFim no formato DD/MM/YYYY.
+   */
+  async obterPeriodo() {
+    console.log('Listar consultas por período');
+    const dataInicio = input('Digite a data inicial (DD/MM/YYYY): ');
+    const dataFim = input('Digite a data final (DD/MM/YYYY): ');
+    return { dataInicio, dataFim };
+  },
 };

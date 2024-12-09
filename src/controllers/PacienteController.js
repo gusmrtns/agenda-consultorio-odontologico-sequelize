@@ -1,88 +1,68 @@
-import { PacienteFactory } from '../factories/PacienteFactory.js';
-import Agenda from '../models/Agenda.js';
+import PacienteRepository from '../repositories/PacienteRepository.js';
 import PacienteView from '../views/PacienteView.js';
 
-/**
- * Controlador responsável pelas operações relacionadas aos pacientes.
- * @class
- */
 export class PacienteController {
-    
-    /**
-     * Cadastra um novo paciente na agenda.
-     * Solicita os dados do paciente, valida e o adiciona à agenda.
-     * @async
-     * @returns {Promise<void>} Retorna uma promessa.
-     */
-    static async cadastrarPaciente() {
-        const { cpf, nome, dataNascimento } = await PacienteView.obterDadosPaciente();
-        const resultado = PacienteFactory.criarPaciente(cpf, nome, dataNascimento);
+  /**
+   * Cadastra um novo paciente no banco de dados.
+   * Solicita os dados do paciente, valida e o adiciona ao banco.
+   * @async
+   * @returns {Promise<void>}
+   */
+  static async cadastrarPaciente() {
+    try {
+      const { cpf, nome, dataNascimento } = await PacienteView.obterDadosPaciente();
 
-        if (!resultado.valido) {
-            PacienteView.mostrarErro(resultado.erro);
-        } else {
-            PacienteView.mostrarMensagem(`Paciente ${resultado.paciente.getNome()} cadastrado com sucesso!`);
-            Agenda.getInstance().adicionarPaciente(resultado.paciente); // Adiciona paciente à agenda
-        }
+      // Validação de CPF e outras regras já são feitas no Repository ou Factory
+      const paciente = await PacienteRepository.criar({ cpf, nome, data_nascimento: dataNascimento });
+      PacienteView.mostrarMensagem(`Paciente ${paciente.nome} cadastrado com sucesso!`);
+    } catch (error) {
+      PacienteView.mostrarErro(error.message);
     }
+  }
 
-    /**
-     * Exclui um paciente da agenda.
-     * Solicita o CPF do paciente e o remove da agenda se não houver consultas futuras.
-     * @async
-     * @returns {Promise<void>} Retorna uma promessa.
-     */
-    static async excluirPaciente() {
-        const cpf = await PacienteView.obterCpfPaciente();
+  /**
+   * Exclui um paciente do banco de dados.
+   * Solicita o CPF do paciente e tenta excluí-lo.
+   * @async
+   * @returns {Promise<void>}
+   */
+  static async excluirPaciente() {
+    try {
+      const cpf = await PacienteView.obterCpfPaciente();
+      await PacienteRepository.excluir(cpf);
+      PacienteView.mostrarMensagem('Paciente excluído com sucesso.');
+    } catch (error) {
+      PacienteView.mostrarErro(error.message);
+    }
+  }
 
-        try {
-            // Verifica se o paciente existe na agenda e remove
-            Agenda.getInstance().removerPaciente(cpf);
-            PacienteView.mostrarMensagem('Paciente excluído com sucesso.');
-        } catch (erro) {
-            PacienteView.mostrarErro(erro.message); // Caso o paciente não seja encontrado
-        }
+  /**
+   * Lista todos os pacientes ordenados por CPF.
+   * @async
+   * @returns {Promise<void>}
+   */
+  static async listarPacientesOrdenadosPorCPF() {
+    try {
+      const pacientes = await PacienteRepository.listar();
+      const pacientesOrdenados = pacientes.sort((a, b) => a.cpf.localeCompare(b.cpf));
+      PacienteView.listarPacientes(pacientesOrdenados);
+    } catch (error) {
+      PacienteView.mostrarErro('Erro ao listar pacientes por CPF.');
     }
+  }
 
-    /**
-     * Lista os pacientes ordenados por nome.
-     * Exibe a lista de pacientes, ordenada alfabeticamente por nome.
-     * @returns {void}
-     */
-    static listarPacientesOrdenadosPorNome() {
-        try {
-            const pacientes = Agenda.getInstance().getPacientes();
-    
-            if (!Array.isArray(pacientes) || pacientes.length === 0) {
-                console.log('Nenhum paciente encontrado.');
-                return;
-            }
-    
-            const pacientesOrdenados = pacientes.sort((a, b) => a.getNome().localeCompare(b.getNome()));
-            PacienteView.listarPacientes(pacientesOrdenados);
-        } catch (error) {
-            console.error('Erro ao listar pacientes por nome:', error.message);
-        }
+  /**
+   * Lista todos os pacientes ordenados por nome.
+   * @async
+   * @returns {Promise<void>}
+   */
+  static async listarPacientesOrdenadosPorNome() {
+    try {
+      const pacientes = await PacienteRepository.listar();
+      const pacientesOrdenados = pacientes.sort((a, b) => a.nome.localeCompare(b.nome));
+      PacienteView.listarPacientes(pacientesOrdenados);
+    } catch (error) {
+      PacienteView.mostrarErro('Erro ao listar pacientes por nome.');
     }
-    
-    /**
-     * Lista os pacientes ordenados por CPF.
-     * Exibe a lista de pacientes, ordenada em ordem crescente de CPF.
-     * @returns {void}
-     */
-    static listarPacientesOrdenadosPorCPF() {
-        try {
-            const pacientes = Agenda.getInstance().getPacientes();
-    
-            if (!Array.isArray(pacientes) || pacientes.length === 0) {
-                console.log('Nenhum paciente encontrado.');
-                return;
-            }
-    
-            const pacientesOrdenados = pacientes.sort((a, b) => a.getCPF().localeCompare(b.getCPF()));
-            PacienteView.listarPacientes(pacientesOrdenados);
-        } catch (error) {
-            console.error('Erro ao listar pacientes por CPF:', error.message);
-        }
-    }
+  }
 }

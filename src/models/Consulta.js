@@ -1,6 +1,6 @@
 import { DataTypes } from 'sequelize';
-import sequelize from '../config/database';
-import Paciente from './Paciente';
+import sequelize from '../config/database.js';
+import Paciente from './Paciente.js';
 
 const Consulta = sequelize.define('Consulta', {
   dataConsulta: {

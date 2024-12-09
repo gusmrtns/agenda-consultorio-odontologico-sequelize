@@ -1,15 +1,13 @@
+import { Sequelize } from 'sequelize';
 import dotenv from 'dotenv';
 
-dotenv.config(); // Carrega as variáveis do .env
+// hardcoded values because .env is not working
+const sequelize = new Sequelize('clinic_db', 'admin', 'admin', {
+  host: 'localhost',
+  dialect: 'postgres',
+  port: 5432,
+  logging: false,
+});
 
-const config = {
-  host: process.env.DB_HOST,
-  username: process.env.DB_USERNAME,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
-  port: process.env.DB_PORT,
-  dialect: process.env.DB_DIALECT,
-  logging: process.env.DB_LOGGING === 'true', // Convertendo para booleano
-};
 
-export default config;
+export default sequelize;

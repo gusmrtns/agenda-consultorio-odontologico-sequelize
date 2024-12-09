@@ -66,32 +66,36 @@ async function exibirMenuCadastroPaciente() {
 
 async function exibirMenuAgenda() {
     console.log(`
-    1 - Agendar consulta
-    2 - Cancelar consulta
-    3 - Listar agenda
-    4 - Voltar
-    `);
-
-    const opcao = input('Escolha uma opção: ');
-
-    switch (opcao) {
+        1 - Agendar consulta
+        2 - Cancelar consulta
+        3 - Listar toda a agenda
+        4 - Listar consultas por período
+        5 - Voltar
+      `);
+    
+      const opcao = input('Escolha uma opção: ');
+    
+      switch (opcao) {
         case '1':
-            await ConsultaController.agendarConsulta();
-            break;
+          await ConsultaController.agendarConsulta();
+          break;
         case '2':
-            await ConsultaController.cancelarConsulta();
-            break;
+          await ConsultaController.cancelarConsulta();
+          break;
         case '3':
-            ConsultaController.listarAgenda();
-            break;
+          ConsultaController.listarAgenda();
+          break;
         case '4':
-            await exibirMenuPrincipal();
-            return;
+          await ConsultaController.listarPorPeriodo();
+          break;
+        case '5':
+          await exibirMenuPrincipal();
+          return;
         default:
-            console.log('Opção inválida, tente novamente.');
-    }
-
-    await exibirMenuAgenda(); // Volta para o menu da agenda
+          console.log('Opção inválida, tente novamente.');
+      }
+    
+      await exibirMenuAgenda(); // Volta para o menu da agenda
 }
 
 async function iniciarApp() {

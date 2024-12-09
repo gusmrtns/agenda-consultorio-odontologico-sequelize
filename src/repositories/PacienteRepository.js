@@ -1,4 +1,4 @@
-import PacienteDAO from '../daos/PacienteDAO';
+import PacienteDAO from '../daos/PacienteDAO.js';
 
 class PacienteRepository {
   async criar(pacienteData) {

@@ -1,62 +1,110 @@
-import { ConsultaFactory } from '../factories/ConsultaFactory.js';
-import Agenda from '../models/Agenda.js';
+import ConsultaRepository from '../repositories/ConsultaRepository.js';
+import PacienteRepository from '../repositories/PacienteRepository.js';
 import ConsultaView from '../views/ConsultaView.js';
+import { DateTime } from 'luxon';
 
-/**
- * Controlador responsável pelo gerenciamento das consultas.
- * @class
- */
-export class ConsultaController {
+class ConsultaController {
+  /**
+   * Agendar uma nova consulta.
+   * Solicita os dados, valida e persiste a consulta no banco de dados.
+   * @async
+   * @returns {Promise<void>}
+   */
+  static async agendarConsulta() {
+    try {
+      const { cpf, dataConsulta, horaInicio, horaFim } = await ConsultaView.obterDadosConsulta();
 
-    /**
-     * Método para agendar uma consulta.
-     * Solicita os dados da consulta, valida e a adiciona à agenda.
-     * @async
-     * @returns {Promise<void>} Retorna uma promessa.
-     */
-    static async agendarConsulta() {
-        const { cpf, dataConsulta, horaInicio, horaFim } = await ConsultaView.obterDadosConsulta();
-        const paciente = Agenda.getInstance().getPacientes().find(p => p.getCPF() === cpf);
+      const paciente = await PacienteRepository.buscarPorCPF(cpf);
+      if (!paciente) throw new Error('Paciente não encontrado.');
 
-        if (!paciente) {
-            ConsultaView.mostrarErro('Paciente não encontrado.');
-            return;
-        }
+      // Validações específicas
+      const consultas = await ConsultaRepository.listar();
+      const consultaFutura = consultas.some(c => c.pacienteId === paciente.id && new Date(c.dataConsulta) > new Date());
 
-        const resultado = ConsultaFactory.criarConsulta(paciente, dataConsulta, horaInicio, horaFim);
+      if (consultaFutura) throw new Error('O paciente já possui uma consulta futura.');
 
-        if (!resultado.valido) {
-            ConsultaView.mostrarErro(resultado.erro);
-        } else {
-            Agenda.getInstance().adicionarConsulta(resultado.consulta);
-            ConsultaView.mostrarMensagem(`Consulta agendada para ${resultado.consulta.getPaciente()} em ${dataConsulta} das ${horaInicio} às ${horaFim}`);
-        }
+      // Criar a consulta
+      const consulta = await ConsultaRepository.criarConsulta({
+        pacienteId: paciente.id,
+        dataConsulta,
+        horaInicio,
+        horaFim,
+      });
+
+      ConsultaView.mostrarMensagem(`Consulta agendada com sucesso para ${dataConsulta}, das ${horaInicio} às ${horaFim}.`);
+    } catch (error) {
+      ConsultaView.mostrarErro(error.message);
     }
+  }
 
-    /**
-     * Método para cancelar uma consulta.
-     * Solicita os dados da consulta a ser cancelada e a remove da agenda.
-     * @async
-     * @returns {Promise<void>} Retorna uma promessa.
-     */
-    static async cancelarConsulta() {
-        const { cpf, dataConsulta, horaInicio } = await ConsultaView.obterDadosCancelamento();
-        const sucesso = Agenda.getInstance().cancelarConsulta(cpf, dataConsulta, horaInicio);
+  /**
+   * Cancelar uma consulta futura.
+   * @async
+   * @returns {Promise<void>}
+   */
+  static async cancelarConsulta() {
+    try {
+      const { cpf, dataConsulta, horaInicio } = await ConsultaView.obterDadosCancelamento();
+      const paciente = await PacienteRepository.buscarPorCPF(cpf);
 
-        if (sucesso) {
-            ConsultaView.mostrarMensagem('Consulta cancelada com sucesso.');
-        } else {
-            ConsultaView.mostrarErro('Erro ao cancelar consulta.');
-        }
+      if (!paciente) throw new Error('Paciente não encontrado.');
+
+      const consultas = await ConsultaRepository.listar();
+      const consulta = consultas.find(c => c.pacienteId === paciente.id && c.dataConsulta === dataConsulta && c.horaInicio === horaInicio);
+
+      if (!consulta) throw new Error('Consulta não encontrada.');
+      if (new Date(consulta.dataConsulta) <= new Date()) throw new Error('Não é possível cancelar consultas passadas.');
+
+      await ConsultaRepository.excluir(consulta.id);
+      ConsultaView.mostrarMensagem('Consulta cancelada com sucesso.');
+    } catch (error) {
+      ConsultaView.mostrarErro(error.message);
     }
+  }
 
-    /**
-     * Método para listar a agenda.
-     * @async
-     * @returns {Promise<void>} Retorna uma promessa.
-     */
-    static async listarAgenda() {
-        const agenda = Agenda.getInstance().getConsultas();
-        ConsultaView.listarAgenda(agenda);
+  /**
+   * Listar a agenda completa.
+   * @async
+   * @returns {Promise<void>}
+   */
+  static async listarAgenda() {
+    try {
+      const consultas = await ConsultaRepository.listar();
+      ConsultaView.listarAgenda(consultas);
+    } catch (error) {
+      ConsultaView.mostrarErro('Erro ao listar a agenda.');
     }
+  }
+
+  /**
+   * Listar consultas em um período específico.
+   * @async
+   * @returns {Promise<void>}
+   */
+  static async listarPorPeriodo() {
+    try {
+      const { dataInicio, dataFim } = await ConsultaView.obterPeriodo();
+
+      // Validação de formato de datas
+      const inicioLuxon = DateTime.fromFormat(dataInicio, 'dd/MM/yyyy');
+      const fimLuxon = DateTime.fromFormat(dataFim, 'dd/MM/yyyy');
+
+      if (!inicioLuxon.isValid || !fimLuxon.isValid) {
+        throw new Error('As datas fornecidas são inválidas. Use o formato DD/MM/YYYY.');
+      }
+
+      if (inicioLuxon > fimLuxon) {
+        throw new Error('A data inicial não pode ser maior que a data final.');
+      }
+
+      const consultas = await ConsultaRepository.listarPorPeriodo(dataInicio, dataFim);
+      ConsultaView.listarAgenda(consultas);
+    } catch (error) {
+      ConsultaView.mostrarErro(error.message);
+    }
+  }
+
+
 }
+
+export default ConsultaController;
