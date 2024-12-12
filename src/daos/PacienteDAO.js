@@ -10,7 +10,11 @@ class PacienteDAO {
   }
 
   async listar() {
-    return await Paciente.findAll();
+    return await Paciente.findAll({
+      include: [{ association: 'consultas' }], // Incluir as consultas associadas
+      order: [['cpf', 'ASC']], // Ordenar por CPF
+    });
+    
   }
 
   async excluir(cpf) {

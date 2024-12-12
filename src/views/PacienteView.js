@@ -35,36 +35,43 @@ export default {
     },
 
     /**
-     * Exibe a lista de pacientes com seus dados e consultas futuras.
-     * Para cada paciente, exibe o CPF, nome, data de nascimento, idade e as consultas futuras agendadas.
-     * Caso o paciente não tenha consultas futuras, exibe a mensagem "Sem consultas futuras."
-     * @param {Array<Paciente>} pacientes - Array de instâncias de `Paciente`.
-     * @returns {void}
-     */
-    listarPacientes(pacientes) {
-        console.log('------------------------------------------------------------');
-        console.log('CPF         Nome                        Dt.Nasc.  Idade');
-        console.log('------------------------------------------------------------');
-    
-        pacientes.forEach(paciente => {
-            const idade = this.calcularIdade(paciente.getDataNascimento());
-            console.log(`${paciente.getCPF()} ${paciente.getNome()} ${paciente.getDataNascimento()} ${idade}`);
-            
-            // Exibindo as consultas futuras
-            const consultasFuturas = Agenda.getInstance().getConsultas().filter(consulta => 
-                consulta.getPaciente().getCPF() === paciente.getCPF() && 
-                DateTime.fromFormat(consulta.getDataConsulta(), 'dd/MM/yyyy') > DateTime.now()
-            );
-            
-            if (consultasFuturas.length > 0) {
-                consultasFuturas.forEach(consulta => {
-                    console.log(`Agendado para: ${consulta.getDataConsulta()} ${consulta.getHoraInicio()} às ${consulta.getHoraFim()}`);
-                });
-            } else {
-                console.log('Sem consultas futuras.');
-            }
+ * Exibe a lista de pacientes com seus dados e consultas futuras.
+ * Para cada paciente, exibe o CPF, nome, data de nascimento, idade e as consultas futuras agendadas.
+ * Caso o paciente não tenha consultas futuras, exibe a mensagem "Sem consultas futuras."
+ * @param {Array<Object>} pacientes - Array de objetos representando pacientes.
+ * @returns {void}
+ */
+listarPacientes(pacientes) {
+    console.log('------------------------------------------------------------');
+    console.log('CPF         Nome                        Dt.Nasc.  Idade');
+    console.log('------------------------------------------------------------');
+
+    pacientes.forEach(paciente => {
+        const { cpf, nome, data_nascimento, consultas } = paciente;
+
+        // Calcular idade com Luxon
+        const dataNascimentoLuxon = DateTime.fromISO(data_nascimento);
+        const idade = DateTime.local().diff(dataNascimentoLuxon, 'years').years.toFixed(0);
+
+        console.log(`${cpf.padEnd(12)} ${nome.padEnd(30)} ${dataNascimentoLuxon.toFormat('dd/MM/yyyy')} ${idade}`);
+
+        // Exibindo consultas futuras
+        const consultasFuturas = consultas?.filter(consulta => {
+            const dataConsultaLuxon = DateTime.fromISO(consulta.dataConsulta);
+            return dataConsultaLuxon > DateTime.local();
         });
-    },
+
+        if (consultasFuturas && consultasFuturas.length > 0) {
+            consultasFuturas.forEach(consulta => {
+                const dataFormatada = DateTime.fromISO(consulta.dataConsulta).toFormat('dd/MM/yyyy');
+                console.log(`Agendado para: ${dataFormatada} ${consulta.horaInicio} às ${consulta.horaFim}`);
+            });
+        } else {
+            console.log('Sem consultas futuras.');
+        }
+    });
+},
+
 
     /**
      * Calcula a idade de um paciente com base na sua data de nascimento.

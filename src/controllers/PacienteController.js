@@ -1,10 +1,12 @@
 import PacienteRepository from '../repositories/PacienteRepository.js';
 import PacienteView from '../views/PacienteView.js';
+import { DateTime } from 'luxon';
 
-export class PacienteController {
+
+class PacienteController {
   /**
-   * Cadastra um novo paciente no banco de dados.
-   * Solicita os dados do paciente, valida e o adiciona ao banco.
+   * Cadastra um novo paciente.
+   * Solicita os dados do paciente, valida e delega ao repositório.
    * @async
    * @returns {Promise<void>}
    */
@@ -12,30 +14,83 @@ export class PacienteController {
     try {
       const { cpf, nome, dataNascimento } = await PacienteView.obterDadosPaciente();
 
-      // Validação de CPF e outras regras já são feitas no Repository ou Factory
-      const paciente = await PacienteRepository.criar({ cpf, nome, data_nascimento: dataNascimento });
+      const paciente = await PacienteRepository.criar({
+        cpf,
+        nome,
+        data_nascimento: dataNascimento,
+      });
+
       PacienteView.mostrarMensagem(`Paciente ${paciente.nome} cadastrado com sucesso!`);
     } catch (error) {
       PacienteView.mostrarErro(error.message);
     }
   }
 
+    /**
+   * Cadastra um novo paciente diretamente (para testes).
+   * @param {Object} pacienteData - Dados do paciente.
+   * @async
+   * @returns {Promise<void>}
+   */
+    static async cadastrarPacienteDireto(pacienteData) {
+      try {
+        const paciente = await PacienteRepository.criar(pacienteData);
+        PacienteView.mostrarMensagem(`Paciente ${paciente.nome} cadastrado com sucesso!`);
+      } catch (error) {
+        PacienteView.mostrarErro(error.message);
+      }
+    }
+  
+
   /**
-   * Exclui um paciente do banco de dados.
-   * Solicita o CPF do paciente e tenta excluí-lo.
+   * Exclui um paciente.
+   * Solicita o CPF, valida exclusão e delega ao repositório.
    * @async
    * @returns {Promise<void>}
    */
   static async excluirPaciente() {
     try {
       const cpf = await PacienteView.obterCpfPaciente();
+
       await PacienteRepository.excluir(cpf);
+
       PacienteView.mostrarMensagem('Paciente excluído com sucesso.');
     } catch (error) {
       PacienteView.mostrarErro(error.message);
     }
   }
 
+    /**
+   * Exclui um paciente diretamente (para testes).
+   * @param {string} cpf - CPF do paciente.
+   * @async
+   * @returns {Promise<void>}
+   */
+    static async excluirPacienteDireto(cpf) {
+      try {
+        await PacienteRepository.excluir(cpf);
+        PacienteView.mostrarMensagem('Paciente excluído com sucesso.');
+      } catch (error) {
+        PacienteView.mostrarErro(error.message);
+      }
+    }
+  
+
+  /**
+   * Lista todos os pacientes.
+   * Solicita a listagem ao repositório e exibe na view.
+   * @async
+   * @returns {Promise<void>}
+   */
+  static async listarPacientes() {
+    try {
+      const pacientes = await PacienteRepository.listar();
+      PacienteView.listarPacientes(pacientes);
+    } catch (error) {
+      console.log(error);
+      PacienteView.mostrarErro('Erro ao listar pacientes.');
+    }
+  }
   /**
    * Lista todos os pacientes ordenados por CPF.
    * @async
@@ -66,3 +121,5 @@ export class PacienteController {
     }
   }
 }
+
+export default PacienteController;

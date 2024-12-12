@@ -1,4 +1,5 @@
 import Consulta from '../models/Consulta.js';
+import Paciente from '../models/Paciente.js';
 
 class ConsultaDAO {
   async criarConsulta(consultaData) {
@@ -9,8 +10,11 @@ class ConsultaDAO {
     return await Consulta.findByPk(id);
   }
 
-  async listar() {
-    return await Consulta.findAll();
+  async listar(options = {}) {
+    return await Consulta.findAll({
+      ...options,
+      include: [{ model: Paciente, as: 'paciente' }],
+    });
   }
 
   async excluir(id) {

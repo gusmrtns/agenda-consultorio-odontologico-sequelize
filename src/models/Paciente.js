@@ -1,5 +1,6 @@
 import { DataTypes } from 'sequelize';
 import sequelize from '../config/database.js';
+import Consulta from './Consulta.js';
 
 const Paciente = sequelize.define('Paciente', {
   nome: {
@@ -12,11 +13,11 @@ const Paciente = sequelize.define('Paciente', {
     unique: true,
   },
   data_nascimento: {
-    type: DataTypes.DATE,
+    type: DataTypes.DATEONLY,
     allowNull: false,
   },
 }, {
-  timestamps: false,  // Não usar campos de timestamp (createdAt, updatedAt)
+  timestamps: false,
 });
 
 export default Paciente;

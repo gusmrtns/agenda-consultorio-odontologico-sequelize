@@ -1,4 +1,5 @@
 import prompt from 'prompt-sync';
+import { DateTime } from 'luxon';
 
 const input = prompt();
 
@@ -38,17 +39,35 @@ export default {
     },
 
     /**
-     * Exibe a lista de consultas agendadas.
-     * Para cada consulta, exibe as informações no formato definido pelo método `toString` da classe `Consulta`.
-     * @param {Array<Consulta>} consultas - Array de instâncias de consulta.
-     * @returns {void}
-     */
+ * Exibe a lista de consultas agendadas.
+ * Para cada consulta, exibe as informações formatadas para o usuário.
+ * @param {Array<Object>} consultas - Array de objetos representando consultas.
+ * @returns {void}
+ */
     listarAgenda(consultas) {
-        console.log('Agenda');
+        console.log('Agenda de Consultas:');
+        if (!consultas || consultas.length === 0) {
+          console.log('Nenhuma consulta encontrada.');
+          return;
+        }
+      
         consultas.forEach(consulta => {
-            console.log(consulta.toString());
+          const { paciente, dataConsulta, horaInicio, horaFim } = consulta;
+      
+          // Tratamento de campos antes de exibição
+          const nomePaciente = paciente?.nome || 'Paciente não identificado';
+          const dataFormatada = DateTime.fromISO(dataConsulta).toFormat('dd/MM/yyyy');
+          const horarioInicio = `${horaInicio.slice(0, 2)}:${horaInicio.slice(2)}`;
+          const horarioFim = `${horaFim.slice(0, 2)}:${horaFim.slice(2)}`;
+      
+          // Exibição formatada
+          console.log(`Paciente: ${nomePaciente}`);
+          console.log(`Data: ${dataFormatada}`);
+          console.log(`Horário: ${horarioInicio} - ${horarioFim}`);
+          console.log('----------------------------------------');
         });
-    },
+      },
+
 
     /**
      * Exibe uma mensagem de erro para o usuário.

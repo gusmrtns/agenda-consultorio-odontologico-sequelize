@@ -18,7 +18,5 @@ const Consulta = sequelize.define('Consulta', {
 }, {
   timestamps: false,
 });
- 
-Consulta.belongsTo(Paciente, { foreignKey: 'pacienteId' }); // Relacionamento com Paciente
 
 export default Consulta;
