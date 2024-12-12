@@ -2,6 +2,11 @@ import ConsultaController from '../controllers/ConsultaController.js';
 import sequelize from '../config/database.js';
 import PacienteRepository from '../repositories/PacienteRepository.js';
 import ConsultaRepository from '../repositories/ConsultaRepository.js';
+import { DateTime } from 'luxon';
+import associateModels from '../models/Association.js';
+
+// Carregar associações
+associateModels();
 
 (async () => {
   try {
@@ -19,10 +24,11 @@ import ConsultaRepository from '../repositories/ConsultaRepository.js';
 
     // Criar consultas mockadas
     const consultasMockadas = [
-      { pacienteId: paciente.id, dataConsulta: '2024-12-10', horaInicio: '0900', horaFim: '0930' },
-      { pacienteId: paciente.id, dataConsulta: '2024-12-11', horaInicio: '1000', horaFim: '1030' },
-      { pacienteId: paciente.id, dataConsulta: '2024-12-12', horaInicio: '1100', horaFim: '1130' },
+      { pacienteId: paciente.id, dataConsulta: DateTime.fromFormat('11/12/2024', 'dd/MM/yyyy').toISODate(), horaInicio: '0900', horaFim: '0930' },
+      { pacienteId: paciente.id, dataConsulta: DateTime.fromFormat('12/12/2024', 'dd/MM/yyyy').toISODate(), horaInicio: '1000', horaFim: '1030' },
+      { pacienteId: paciente.id, dataConsulta: DateTime.fromFormat('13/12/2024', 'dd/MM/yyyy').toISODate(), horaInicio: '1100', horaFim: '1130' },
     ];
+    
 
     for (const consulta of consultasMockadas) {
       await ConsultaRepository.criarConsulta(consulta);
