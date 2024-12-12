@@ -33,7 +33,11 @@ async criarConsulta(consultaData) {
     minute: inicioMinutos % 60,
   });
 
-  if (!dataLuxon.isValid || dataLuxon <= agora) {
+  if(!dataLuxon.isValid) {
+    throw new Error('Data inválida.');
+  }
+
+  if (dataLuxon <= agora) {
     throw new Error('A consulta deve ser para um período no futuro.');
   }
 

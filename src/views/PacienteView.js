@@ -1,5 +1,4 @@
 import prompt from 'prompt-sync';
-import Agenda from '../models/Agenda.js';
 import { DateTime } from 'luxon';
 
 const input = prompt();
@@ -20,7 +19,7 @@ export default {
         console.log('Cadastro de Paciente');
         const cpf = input('Digite o CPF: ');
         const nome = input('Digite o nome: ');
-        const dataNascimento = input('Digite a data de nascimento (DD/MM/AAAA): ');
+        const dataNascimento = input('Digite a data de nascimento (AAAA/MM/DD): ');
         return { cpf, nome, dataNascimento };
     },
 
