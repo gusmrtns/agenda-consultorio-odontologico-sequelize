@@ -127,7 +127,7 @@ async function exibirMenuAgenda() {
 async function iniciarApp() {
     try {
         console.log('Verificando conexão com o banco...');
-        await sequelize.authenticate(); // Verificar conexão com o banco
+        await sequelize.authenticate(); 
         console.log('Banco de dados conectado.');
 
         console.log('Bem-vindo ao sistema de gerenciamento de consultório!');
